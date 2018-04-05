@@ -192,8 +192,8 @@ def fully_connected(inputs, nb_filter, activation=tf.nn.relu, bias=True, weights
            bias_init=zeros_initializer, trainable=True,  scope='FC'):
 
   if len(inputs.get_shape().as_list())>2:
-    n_inputs = int(np.prod(inputs.get_shape().as_list()[1:]))
-    inputs = tf.reshape(inputs, [-1, n_inputs])
+    flatten = int(np.prod(inputs.get_shape().as_list()[1:]))
+    inputs = tf.reshape(inputs, [-1, flatten])
   with tf.variable_scope(scope, reuse=tf.AUTO_REUSE) as scope:
     x = tf.layers.dense(inputs,units=nb_filter,activation=activation,use_bias=bias,kernel_initializer=weights_init,
                         bias_initializer=bias_init,trainable=trainable)
@@ -203,7 +203,6 @@ class ConvNet(object):
   def __init__(self):
     self.lr = 0.0001
     self.batch_size = 128
-    self.keep_prob = tf.constant(0.75)
     self.gstep = tf.Variable(0, dtype=tf.int32,
                              trainable=False, name='global_step')
     self.n_classes = 10
@@ -227,7 +226,7 @@ class ConvNet(object):
       conv2 = conv2d(inputs=pool1,nb_filter=64,filter_size=5,trainable=self.training,scope='layer3')
       pool2 = maxpool(conv2, 2, 2, 'same', scope ='layer4')
       fc = fully_connected(pool2, 1024,trainable=self.training, scope='layer5')
-      self.logits = fully_connected(fc, self.n_classes,trainable=self.training, scope='logits')
+      self.logits = fully_connected(fc, self.n_classes,activation=None,trainable=self.training, scope='logits')
 
   def loss(self):
     '''
