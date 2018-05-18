@@ -274,7 +274,9 @@ def main(_):
     saver = tf.train.Saver(max_to_keep=5)
     checkpoint_saver_hook = tf.train.CheckpointSaverHook(FLAGS.save_path, save_steps=m._input.epoch_size,
                                                          saver=saver)
-    hooks = [checkpoint_saver_hook]
+    summary_hook = tf.train.SummarySaverHook(save_secs=2, output_dir=FLAGS.save_path,
+                                             scaffold=tf.train.Scaffold(summary_op=tf.summary.merge_all()))
+    hooks = [checkpoint_saver_hook,summary_hook]
     print("Starting session")
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.4)
     with tf.train.SingularMonitoredSession(hooks=hooks, checkpoint_dir=FLAGS.save_path,
